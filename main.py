@@ -76,6 +76,14 @@ async def get_response(request_prams: GetResponse):
     if response.status_code == 200:
         generated_response = response.json()
         final_response = generated_response.get("response")
+        conn = sqlite3.connect('llm_responses.db')
+        cursor = conn.cursor()
+        cursor.execute("""
+                    INSERT INTO responses (context, question, answer)
+                    VALUES (?, ?, ?)
+                """, (request_prams.context, request_prams.question, final_response))
+        conn.commit()
+        conn.close()
         return {"response": final_response}
     else:
         raise HTTPException(status_code=response.status_code, detail="Failed to generate response")
