@@ -31,3 +31,15 @@ step 5
 ```commandline
 git push
 ```
+
+step 6:
+create a enviornment
+
+```conda create -n <ENV NAME> python=3.11 -y```
+
+step 7: 
+Activate the env
+
+```commandline
+conda activate <ENV NAME>
+```
