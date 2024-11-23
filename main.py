@@ -2,7 +2,31 @@ from fastapi import FastAPI, HTTPException
 import json
 import requests
 from pydantic import BaseModel
+import sqlite3
+
+def init_db():
+    conn = sqlite3.connect('llm_responses.db')
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS responses (
+            id INTEGER PRIMARY KEY,
+            context TEXT,
+            question TEXT,
+            answer TEXT,
+            rating INTEGER,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+init_db()
+
+
+
+
 app = FastAPI()
+
 """"
 post: whenever you want to write something into your database
 get: whenever you want to read from database
@@ -12,6 +36,8 @@ put:- whenever you want to update the existing information
 
 """
 
+
+
 class Information(BaseModel):
     name: str
     age: int
@@ -19,6 +45,7 @@ class Information(BaseModel):
 
 class GetResponse(BaseModel):
     question: str
+    context: str
 
 @app.post("/save_information")
 async def save_information(request_prams:Information):
@@ -30,10 +57,11 @@ async def save_information(request_prams:Information):
 @app.post("/get_ollama_response")
 async def get_response(request_prams: GetResponse):
     question = request_prams.question
+    full_context = f"context: {request_prams.context} \n\n Question: {request_prams.question}"
     url = "http://localhost:11434/api/generate"
     payload = json.dumps({
         "model": "llama3.2:latest",
-        "prompt": question,
+        "prompt": full_context,
         "options": {
             "top_k": 1,
             "top_p": 0.1,
