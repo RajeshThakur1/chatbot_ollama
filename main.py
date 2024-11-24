@@ -46,6 +46,7 @@ class Information(BaseModel):
 class GetResponse(BaseModel):
     question: str
     context: str
+    model: str
 
 class RatingRequest(BaseModel):
     response: str
@@ -64,7 +65,7 @@ async def get_response(request_prams: GetResponse):
     full_context = f"context: {request_prams.context} \n\n Question: {request_prams.question}"
     url = "http://localhost:11434/api/generate"
     payload = json.dumps({
-        "model": "llama3.2:latest",
+        "model": request_prams.model,
         "prompt": full_context,
         "options": {
             "top_k": 1,
